@@ -4,50 +4,44 @@ function setEventHandlers() {
     $('h1').css('font-size','24pt');
 }
 
+
+
 function getWorld() {
     // create world generation
     // begin with grid with all walls
 
     var world = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 3, 1, 1, 1, 1, 1, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 3, 1, 1, 1, 1, 4, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 4, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 4, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 4, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 4, 0, 0, 0],
         [0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
         [0, 1, 0, 0, 0, 1, 0, 0, 1, 0],
-        [0, 1, 1, 1, 1, 1, 2, 1, 1, 0],
+        [0, 1, 4, 4, 4, 1, 2, 1, 1, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
 
     return world;
 }
 
-function setGameDictionary() {
+function getBoardDictionary() {
     var boardDictionary = {
-        0: 'open_space',
-        1: 'wall',
+        0: 'wall',
+        1: 'open_space',
         2: 'ghost',
-        3: 'packman',
-        4: 'five_points',
+        3: 'pacman',
+        4: 'coin',
         5: 'bonus_points',
     }
     return boardDictionary;
 }
 
-function movePackman(world) {
 
-    
-}
+function drawWorld(world) {
+    boardDictionary = getBoardDictionary();
 
-
-function buildWorld() {
-    boardDictionary = setGameDictionary();
-
-    var world = getWorld();
-
-    
     var htmlStr = "";
     for (let rowIndex = 0; rowIndex < world.length; rowIndex++) {
         htmlStr += "<div class='world_row'>";
@@ -62,52 +56,148 @@ function buildWorld() {
     return world;
 }
 
-$(document).ready(function() {
-    // what should happen when the page is ready?
-    // alert("PAGE READY!");
-    var world = buildWorld();
-  
-    var packman = {
+function getPacman(){
+    var pacman = {
         rowIndex: 1,
         colIndex: 1,
     }
+    return pacman;
+}
 
-    var packmanLocation = [1,1];
-    function changePosition(keyPressDirection) {
-        // if up
-        // current world board
+function startGame() {
+    var game = {
+        pacman: getPacman(),
+        world: getWorld(),
+        dictionary: getBoardDictionary(),
+        move_size: 1,
     }
+    return game;
+}
 
+
+$(document).ready(function() {
+
+    var game = startGame();
+    // console.log(game);
+    // var world = getWorld();
+    // console.log(game.world);
+
+    drawWorld(game.world);
+
+    //set listener
     $(document).on("keydown", function(e) {
+        
+        if (e.keyCode === 37){
+            
+            console.log("TRYING TO MOVE LEFT");
+            movePacman(game, "LEFT");
 
-            // keycodes
-        if (keycode === 37){
-            console.log("LEFT");
-        } else if (keycode === 38) {
-            console.log("UP!");
-        } else if (keycode === 39) {
-            console.log("RIGHT");
-        } else if (keycode === 40) {
-            console.log("DOWN");
+        } else if (e.keyCode === 38) {
+            console.log("TRYING TO MOVE UP!");
+            movePacman(game, "UP");
+
+        } else if (e.keyCode === 39) {
+            console.log("TRYING TO MOVE RIGHT");
+            movePacman(game, "RIGHT");
+
+
+        } else if (e.keyCode === 40) {
+            console.log("TRYING TO MOVE DOWN");
+            movePacman(game, "DOWN");
+
+
+
         }
     })
 
-
-
-
-    var blockCode = 'class="block"'; //assign the class as block
-
-    var wallCode = 'class="wall"' ; //assign the class as wall
-
-
-    // $('.world').append(world);
-
-    var middleContents = "";
-    middleContents += "<h1>This is a dynamically created heading</h1>";
-    middleContents += "<p class='dynamic-p'>THIS is a dynamically created paragraph </p>";
-
-    $('.middle_stuff').before("BEFORE STUFF" + middleContents + "<br/><br/>");
-    $('.middle_stuff').after("<br/><br/>AFTER STUFF" + middleContents);
-    setEventHandlers();
-
 })
+
+
+function movePacman(game, direction) {
+    
+    var pac_row = game.pacman.rowIndex;
+    var pac_col = game.pacman.colIndex;
+    var move_spaces = game.move_size;
+
+    console.log("row: " + pac_row + " | col: " + pac_row);
+
+
+    
+    if (direction === "RIGHT") {
+        var test_space = game.world[pac_row][pac_col + move_spaces];
+        console.log("value in test_space: " + test_space);
+
+        console.log(game.world);
+        console.log(game.pacman);
+        // test to the right
+        
+        if(test_space != 0){
+            //if test to the right is NOT a wall
+            // pac_col += 1;
+            game.pacman.colIndex += move_spaces;
+            console.log("new pac col: " + game.pacman.colIndex);
+            console.log("NOT A WALL! MOVE RIGHT!");
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 3;
+            game.world[game.pacman.rowIndex][game.pacman.colIndex - move_spaces] = 1;
+        } else{
+            // alert("THATS A WALL");
+        }
+    } 
+    else if (direction === "LEFT") {
+        var test_space = game.world[pac_row][pac_col - move_spaces];
+        console.log("testing: " + test_space);
+        console.log("new pac col: " + pac_col);
+
+        if(test_space != 0){
+            pac_col -= move_spaces;            
+            game.pacman.colIndex -= move_spaces;
+            console.log("new pac col: " + game.pacman.colIndex);
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 3;
+            game.world[game.pacman.rowIndex][game.pacman.colIndex + move_spaces] = 1;
+        }
+        else{
+            // alert("THAT'S A WALL");
+        }
+
+    }
+    else if ( direction === "UP" ) {
+        var test_space = game.world[pac_row - move_spaces][pac_col];
+        console.log("test space: " + test_space);
+
+        if (test_space != 0){
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 1;
+            game.pacman.rowIndex -= move_spaces;
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 3;
+        } else {
+            // alert("THAT'S A WALL");
+        }
+
+    }
+    else if ( direction === "DOWN") {
+        var test_space = game.world[pac_row + move_spaces][pac_col];
+        console.log("test_space: " + test_space);
+        
+        if (test_space != 0) {
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 1;
+            game.pacman.rowIndex += move_spaces;
+            game.world[game.pacman.rowIndex][game.pacman.colIndex] = 3;
+        } else{
+            // alert("THAT'S A WALL");
+        }
+    }
+
+    drawWorld(game.world);
+
+
+
+    }
+
+
+
+        // game.world[ game.pacman[colIndex] ] [game.pacman[[rowIndex]];
+
+        // game.pacman.colIndex += 1;
+
+
+
+    //make sure to draw the new world
